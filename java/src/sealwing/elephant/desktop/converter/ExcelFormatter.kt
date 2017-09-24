@@ -1,32 +1,43 @@
-package sealwing.elephant.desktop.data
+package sealwing.elephant.desktop.converter
 
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import sealwing.elephant.desktop.converter.getRussianTitle
+import sealwing.elephant.desktop.config.Config
 import sealwing.elephant.desktop.core.*
+import java.io.FileOutputStream
 
 /*
-    Trying to follow clear and functional style
+    Trying to follow more clear and functional style
  */
+
+// SAVING
+
+fun saveToExcel(book: XSSFWorkbook, fileName: String) {
+    book.write(FileOutputStream("${Config.outputFolder}/$fileName.xlsx"))
+    book.close()
+}
+
 
 // CONVERTION TO XLSX
 
-fun toXLSX(deal: Deal): XSSFWorkbook {
+// need to be closed ?
+fun formXLSX(deal: Deal): XSSFWorkbook {
     val book = XSSFWorkbook()
     for (construction in deal.constructionList) {
         createSheet(construction, book)
     }
     //addSupplements(sheet, construction.supplementList, rowAcc)
+    //addPrices
     return book
 }
 
 // Row acc stands for row number accumulation
 
-private fun createSheet(construction: Construction,  book: XSSFWorkbook): Sheet {
+private fun createSheet(construction: Construction, book: XSSFWorkbook): Sheet {
     val sheet = book.createSheet(getRussianTitle(construction.type))
     var rowAcc = 1
-    rowAcc = addHeader(sheet, construction.type, construction.width, construction.height, rowAcc)
+    rowAcc = addHeader(sheet, construction.type, construction.amount, construction.width, construction.height, rowAcc)
     rowAcc = addInnerPart(sheet, construction.fitWidth, construction.fitHeight, construction.type, rowAcc)
     addProfiles(sheet, construction.profilesList, rowAcc)
     return sheet
@@ -34,12 +45,13 @@ private fun createSheet(construction: Construction,  book: XSSFWorkbook): Sheet 
 
 // Return of Int is returning of the next unused row, so to follow it in next calculations
 
-private fun addHeader(sheet: XSSFSheet, type: ConstructionType, width: Int, height: Int, startRow: Int): Int {
+private fun addHeader(sheet: XSSFSheet, type: ConstructionType, amount: Int, width: Int, height: Int, startRow: Int): Int {
     var rowAcc: Int = startRow
     val nameRow = sheet.createRow(rowAcc)
     rowAcc++
     nameRow.createCell(1).setCellValue("Конструкция")
     nameRow.createCell(2).setCellValue(getRussianTitle(type))
+    nameRow.createCell(3).setCellValue("${amount}шт.")
     sheet.createRow(rowAcc).createCell(1).setCellValue("Размеры")
     rowAcc++
     val sizeRow = sheet.createRow(rowAcc)
@@ -79,7 +91,7 @@ private fun addProfiles(sheet: XSSFSheet, profilesList: ArrayList<Profile>, star
     sheet.createRow(startRow).createCell(1).setCellValue("Профили")
     rowAcc++
     // add profiles
-    for ((type, length, amount) in profilesList){
+    for ((type, length, amount) in profilesList) {
         val row = sheet.createRow(startRow)
         rowAcc++
         row.createCell(1).setCellValue(getRussianTitle(type))
@@ -89,13 +101,10 @@ private fun addProfiles(sheet: XSSFSheet, profilesList: ArrayList<Profile>, star
     return rowAcc
 }
 
-private fun addSupplements(sheet: XSSFSheet, supplementList: HashMap<SupplementType, Int>, startRow: Int): Int {
-    var rowAcc = startRow
-    return rowAcc
+private fun addSupplements(sheet: XSSFSheet, supplementList: HashMap<SupplementType, Int>) {
+
 }
 
-// SAVING
-
-fun saveToExcel(book: XSSFWorkbook) {
+private fun addPrices(sheet: XSSFSheet) {
 
 }

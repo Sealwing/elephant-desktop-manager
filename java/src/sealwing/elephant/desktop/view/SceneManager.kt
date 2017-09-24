@@ -12,6 +12,8 @@ import sealwing.elephant.desktop.core.ConstructionType
 import sealwing.elephant.desktop.core.Deal
 import sealwing.elephant.desktop.converter.fromStructToString
 import sealwing.elephant.desktop.converter.supplementToString
+import sealwing.elephant.desktop.converter.formXLSX
+import sealwing.elephant.desktop.converter.saveToExcel
 
 class SceneManager {
 
@@ -23,8 +25,7 @@ class SceneManager {
             addActions()
             toggleButtons()
             wrap()
-            val scene = Scene(box, 440.0, 500.0)
-            return scene
+            return Scene(box, 440.0, 500.0)
         }
 
     private val box = VBox()
@@ -33,6 +34,15 @@ class SceneManager {
     private val sizeBox = HBox()
     private val constBox = HBox()
     private val controlBox = HBox()
+
+    private val menuBar = MenuBar()
+    private val fileMenu = Menu("Файл")
+    private val infoItem = MenuItem("Информация")
+    private val saveItem = MenuItem("Сохранить")
+    private val dealMenu = Menu("Заказ")
+    private val additionMenu = MenuItem("Добавочные элементы")
+    private val managerMenu = MenuItem("Открыть заказ")
+
 
     private val infoTree: TreeView<Label> = TreeView()
 
@@ -61,6 +71,10 @@ class SceneManager {
     private val costItem = TreeItem<Label>(Label("Стоимость:"))
 
     init {
+        fileMenu.items.addAll(saveItem, SeparatorMenuItem(), infoItem)
+        dealMenu.items.addAll(additionMenu, managerMenu)
+        menuBar.menus.addAll(fileMenu, dealMenu)
+
         constAmount.items.addAll("1", "2", "3", "4")
         constAmount.value = constAmount.items[0]
         constAmount.isEditable = false
@@ -85,6 +99,8 @@ class SceneManager {
         height.promptText = "Высота"
     }
 
+
+    //ACTTION BUTTONS
 
     private fun addActions() {
         count.setOnAction { count() }
@@ -118,7 +134,8 @@ class SceneManager {
     private fun save() {
         val canSave = dealSet && (address.text.isNotEmpty() || dealId.text.isNotEmpty())
         if (canSave) {
-            // SAVE
+            val fileName = "${if (dealId.text.isNotEmpty()) dealId.text else ""}-${if (address.text.isNotEmpty()) address.text else ""}"
+            saveToExcel(formXLSX(currentDeal), fileName)
         }
     }
 
@@ -146,6 +163,8 @@ class SceneManager {
         costItem.children.clear()
     }
 
+    // FUNCTIONALITY
+
     private fun refreshAdditions() {
         if (supplementItem.children.lastIndex < 1) supplementItem.children.add(TreeItem<Label>(Label(supplementToString(currentDeal))))
         else supplementItem.children[0].value.text = supplementToString(currentDeal)
@@ -157,6 +176,16 @@ class SceneManager {
 
     private fun haveParams(): Boolean = width.text.isNotEmpty() && height.text.isNotEmpty()
 
+    private fun getType(): ConstructionType =
+            when (type.selectedToggle) {
+                doubleType -> ConstructionType.DOUBLE
+                tripleType -> ConstructionType.TRIPLE
+                quadroType -> ConstructionType.QUARTET
+                solidType -> ConstructionType.SOLID
+                else -> ConstructionType.QUARTET
+            }
+
+    // TYPE JOB
 
     private fun toggleButtons() {
         doubleType.toggleGroup = type
@@ -166,21 +195,15 @@ class SceneManager {
         solidType.toggleGroup = type
     }
 
+    // BUILDING UI
+
+    // wrapping up all parts of UI
     private fun wrap() {
         nameBox.children.addAll(dealId, address)
         sizeBox.children.addAll(width, height)
         constBox.children.addAll(doubleType, tripleType, quadroType, solidType, constAmount)
         controlBox.children.addAll(count, save, add, clear)
-        box.children.addAll(nameBox, sizeBox, constBox, controlBox, infoTree)
+        box.children.addAll(menuBar, nameBox, sizeBox, constBox, controlBox, infoTree)
     }
-
-    private fun getType(): ConstructionType =
-            when (type.selectedToggle) {
-                doubleType -> ConstructionType.DOUBLE
-                tripleType -> ConstructionType.TRIPLE
-                quadroType -> ConstructionType.QUARTET
-                solidType -> ConstructionType.SOLID
-                else -> ConstructionType.QUARTET
-            }
 
 }

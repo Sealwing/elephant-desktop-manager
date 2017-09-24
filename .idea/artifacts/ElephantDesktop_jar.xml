@@ -3,7 +3,7 @@
     <output-path>$PROJECT_DIR$/../ElephantDesktop/out/artifacts/ElephantDesktop_jar</output-path>
     <root id="archive" name="ElephantDesktop.jar">
       <element id="directory" name="META-INF">
-        <element id="file-copy" path="$PROJECT_DIR$/../ElephantDesktop/src/ext/META-INF/MANIFEST.MF" />
+        <element id="file-copy" path="$PROJECT_DIR$/../ElephantDesktop/java/src/ext/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="ElephantDesktop" />
       <element id="extracted-dir" path="$PROJECT_DIR$/../ElephantDesktop/lib/kotlin-reflect.jar" path-in-jar="/" />
